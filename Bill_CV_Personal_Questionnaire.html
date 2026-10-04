@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bill Franks CV — Personal Profile Questionnaire</title>
+<style>
+  :root{
+    --bg:#0b0d10; --card:#151922; --card2:#1b202b; --text:#f4f6f8;
+    --muted:#aab2bf; --line:#2a3140; --accent:#7aa2ff; --accent2:#a9c1ff;
+    --ok:#73d49b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#090b0e,#11151c 45%,#090b0e);
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 80px}
+  .hero{
+    position:sticky; top:0; z-index:10; padding:14px 0 12px;
+    background:linear-gradient(180deg,rgba(11,13,16,.97),rgba(11,13,16,.88),rgba(11,13,16,0));
+    backdrop-filter:blur(12px);
+  }
+  h1{font-size:25px;line-height:1.08;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:14px;line-height:1.4}
+  .progress{height:5px;background:#202633;border-radius:99px;overflow:hidden;margin-top:12px}
+  .bar{height:100%;width:0;background:var(--accent);transition:width .2s}
+  .q{
+    margin:14px 0; padding:16px; border:1px solid var(--line); border-radius:16px;
+    background:rgba(21,25,34,.95); box-shadow:0 8px 30px rgba(0,0,0,.18);
+  }
+  .q h2{font-size:17px;line-height:1.3;margin:0 0 5px}
+  .hint{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .opts{display:grid;gap:9px}
+  button.opt{
+    width:100%; text-align:left; border:1px solid #343d4f; background:var(--card2);
+    color:var(--text); border-radius:12px; padding:12px 13px; font-size:15px;
+    line-height:1.25; -webkit-tap-highlight-color:transparent;
+  }
+  button.opt:active{transform:scale(.995)}
+  button.opt.sel{
+    border-color:var(--accent); background:#18223a; box-shadow:inset 0 0 0 1px var(--accent);
+  }
+  .letter{
+    display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;
+    margin-right:8px;background:#252c39;color:var(--accent2);font-weight:700;font-size:12px;
+  }
+  button.opt.sel .letter{background:var(--accent);color:#07101f}
+  .actions{
+    position:sticky;bottom:0;padding:14px 0 calc(14px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(11,13,16,0),rgba(11,13,16,.95) 28%);
+  }
+  .primary{
+    width:100%;border:0;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:700;
+    background:var(--accent);color:#07101f;
+  }
+  .result{
+    display:none;margin-top:14px;padding:16px;border-radius:16px;background:#101722;border:1px solid #2c3c58
+  }
+  .result.show{display:block}
+  textarea{
+    width:100%;min-height:210px;border:1px solid #35415a;border-radius:12px;background:#0b111a;
+    color:var(--text);padding:12px;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical
+  }
+  .copy{
+    margin-top:10px;width:100%;border:1px solid #3f5f91;border-radius:12px;padding:12px;
+    background:#15253d;color:#dce8ff;font-weight:650;font-size:15px;
+  }
+  .ok{color:var(--ok);font-size:13px;margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Make Bill’s CV sound like Bill</h1>
+    <div class="sub">Tap the answers that fit you. Some questions allow more than one answer. Question 10 allows exactly three.</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+
+  <div id="questions"></div>
+
+  <div class="result" id="result">
+    <h2 style="margin-top:0">Your answers</h2>
+    <div class="hint">Tap “Copy answers,” then paste them back into ChatGPT.</div>
+    <textarea id="output" readonly></textarea>
+    <button class="copy" id="copyBtn">Copy answers</button>
+    <div class="ok" id="copyStatus"></div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="finishBtn">Finish questionnaire</button>
+  </div>
+</div>
+
+<script>
+const qs = [
+ {id:1, type:"multi", title:"Why do people hire you again?", opts:[
+  ["A","I’m very reliable"],["B","I’m strong technically"],["C","I’m good under pressure"],
+  ["D","I make operators’ lives easier"],["E","I keep the camera team organized"],
+  ["F","I’m very good at difficult focus"],["G","Other"]
+ ]},
+ {id:2, type:"multi", title:"What are you best at?", opts:[
+  ["A","Focus pulling"],["B","Fast camera builds / changes"],["C","Troubleshooting"],
+  ["D","Working with operators"],["E","Running B camera smoothly"],
+  ["F","Technical systems / wireless / Preston / LR2"],["G","All of the above"]
+ ]},
+ {id:3, type:"multi", title:"What kind of work suits you best?", opts:[
+  ["A","Long-form TV drama"],["B","Features"],["C","Fast-paced episodic TV"],
+  ["D","Second unit"],["E","Handheld / Steadicam-heavy work"],
+  ["F","Technically complex camera work"],["G","All of the above"]
+ ]},
+ {id:4, type:"multi", title:"How are you on set?", opts:[
+  ["A","Calm"],["B","Quiet"],["C","Funny"],["D","Meticulous"],["E","Fast"],
+  ["F","Highly technical"],["G","Protective of the camera team"],["H","Easygoing"],["I","Intense when needed"]
+ ]},
+ {id:5, type:"multi", title:"What separates you from an average 1st AC?", opts:[
+  ["A","Better technical knowledge"],["B","Better focus instincts"],["C","Better problem-solving"],
+  ["D","Better organization"],["E","Better communication with operators / DPs"],
+  ["F","Better at adapting quickly"],["G","I’m not sure"]
+ ]},
+ {id:6, type:"single", title:"How much should the CV emphasize technical gear knowledge?", opts:[
+  ["A","A lot"],["B","Moderately"],["C","Only a little"],["D","Almost not at all"]
+ ]},
+ {id:7, type:"multi", title:"What jobs do you want more of now?", opts:[
+  ["A","A-camera 1st AC"],["B","B-camera 1st AC"],["C","Features"],
+  ["D","Streaming drama"],["E","Second unit"],["F","Bigger-budget productions"],["G","All of the above"]
+ ]},
+ {id:8, type:"multi", title:"What should a DP understand about you immediately?", opts:[
+  ["A","I’m dependable"],["B","I’m technically strong"],["C","I’m good with difficult focus"],
+  ["D","I’m easy to work with"],["E","I’m experienced and calm"],
+  ["F","I solve problems without drama"],["G","I care a lot about doing the job properly"]
+ ]},
+ {id:9, type:"single", title:"Which tone sounds most like you?", opts:[
+  ["A","Straightforward and professional"],["B","Confident but understated"],["C","Technical and precise"],
+  ["D","Warm and personable"],["E","Very concise"],["F","A mix of B + C + E"]
+ ]},
+ {id:10, type:"max3", title:"Pick the three words closest to you", hint:"Choose exactly three.", opts:[
+  ["A","Calm"],["B","Reliable"],["C","Technical"],["D","Meticulous"],["E","Fast"],
+  ["F","Adaptable"],["G","Organized"],["H","Experienced"],["I","Easygoing"],["J","Focused"]
+ ]}
+];
+
+const state = {};
+const wrap = document.getElementById("questions");
+
+function render(){
+  qs.forEach(q=>{
+    const box=document.createElement("section");
+    box.className="q";
+    box.innerHTML=`<h2>${q.id}. ${q.title}</h2><div class="hint">${q.hint || (q.type==="single" ? "Choose one." : "Choose all that apply.")}</div>`;
+    const opts=document.createElement("div"); opts.className="opts";
+    q.opts.forEach(([k,label])=>{
+      const b=document.createElement("button"); b.className="opt"; b.type="button";
+      b.dataset.q=q.id; b.dataset.k=k; b.dataset.label=label;
+      b.innerHTML=`<span class="letter">${k}</span>${label}`;
+      b.addEventListener("click",()=>select(q,b));
+      opts.appendChild(b);
+    });
+    box.appendChild(opts); wrap.appendChild(box);
+  });
+}
+function select(q,b){
+  const qid=String(q.id);
+  if(!state[qid]) state[qid]=[];
+  const k=b.dataset.k;
+  if(q.type==="single"){
+    state[qid]=[k];
+    document.querySelectorAll(`[data-q="${qid}"]`).forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel");
+  }else{
+    const has=state[qid].includes(k);
+    if(has){
+      state[qid]=state[qid].filter(x=>x!==k);
+      b.classList.remove("sel");
+    }else{
+      if(q.type==="max3" && state[qid].length>=3) return;
+      state[qid].push(k); b.classList.add("sel");
+    }
+  }
+  updateProgress();
+}
+function updateProgress(){
+  const done=qs.filter(q=>state[String(q.id)] && state[String(q.id)].length).length;
+  document.getElementById("bar").style.width=(done/qs.length*100)+"%";
+}
+function buildOutput(){
+  return qs.map(q=>{
+    const picks=(state[String(q.id)]||[]);
+    const labels=picks.map(k=>{
+      const found=q.opts.find(o=>o[0]===k);
+      return `${k}. ${found ? found[1] : ""}`;
+    });
+    return `${q.id}. ${labels.length ? labels.join("; ") : "No answer"}`;
+  }).join("\n");
+}
+document.getElementById("finishBtn").addEventListener("click",()=>{
+  const q10=(state["10"]||[]);
+  if(q10.length!==3){
+    alert("Question 10 needs exactly three choices.");
+    return;
+  }
+  document.getElementById("output").value=buildOutput();
+  const r=document.getElementById("result");
+  r.classList.add("show");
+  r.scrollIntoView({behavior:"smooth",block:"start"});
+});
+document.getElementById("copyBtn").addEventListener("click",async()=>{
+  const txt=document.getElementById("output").value;
+  try{
+    await navigator.clipboard.writeText(txt);
+    document.getElementById("copyStatus").textContent="Copied. Paste this into ChatGPT.";
+  }catch(e){
+    const ta=document.getElementById("output");
+    ta.focus(); ta.select();
+    document.execCommand("copy");
+    document.getElementById("copyStatus").textContent="Copied. Paste this into ChatGPT.";
+  }
+});
+render();
+</script>
+</body>
+</html>
